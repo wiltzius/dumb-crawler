@@ -47,7 +47,7 @@ def consume(url):
 def main():
     logging.basicConfig(level=logging.DEBUG)
     urls = []
-    with open('urls.csv') as csvfile:
+    with open('urls-50k.csv') as csvfile:
         reader = csv.DictReader(csvfile, ['url', 'cnt'])
         urls = [row['url'] for row in reader]
         urls = urls[1:]     # strip out header row
@@ -55,7 +55,7 @@ def main():
     urls = [url.replace('%3A%2F%2F', '://') for url in urls]
     # dedupe
     urls = set(urls)
-    pool = Pool(processes=2)
+    pool = Pool(processes=50)
     promise = pool.map_async(consume, urls)
     results = []
     try:
