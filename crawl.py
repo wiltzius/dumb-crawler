@@ -29,16 +29,16 @@ def consume(url):
         for tag in soup.find_all(name='meta', attrs={'name': "viewport"}):
             # strip out any whitespace
             content = tag['content'].replace(' ', '')
-            logging.info(content)
+            logging.debug(content)
             # check for required values
             if ('width=device-width' in content
                     and 'minimum-scale=1.0' in content
                     and 'minimal-ui' in content):
-                logging.info('It matches')
+                logging.info('Found match:' + url)
                 # NB that this returns true if _any_ viewport tag matches
                 return {'url': url, 'magic_viewport': True}
         # Couldn't find the magic in any viewport tag
-        logging.info("It doesn't match")
+        logging.info("No match for:" + url)
         return {'url': url, 'magic_viewport': False}
     except Exception:
         logging.info('Failed to process URL: ' + url)
@@ -55,11 +55,11 @@ def main():
     urls = [url.replace('%3A%2F%2F', '://') for url in urls]
     # dedupe
     urls = set(urls)
-    pool = Pool(processes=50)
+    pool = Pool(processes=200)
     promise = pool.map_async(consume, urls)
     results = []
     try:
-        results = promise.get(0xFFFF)
+        results = promise.get()
     except KeyboardInterrupt:
         logging.error('Terminating worker pool')
         pool.terminate()
